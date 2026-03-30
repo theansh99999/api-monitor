@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Monitoring Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                <i class="bi bi-speedometer2"></i>
+                <span>API Monitor</span>
+            </h5>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a href="/" class="nav-link active">
+                    <i class="bi bi-house-door"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/projects" class="nav-link">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Projects</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/logs" class="nav-link">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/compare" class="nav-link">
+                    <i class="bi bi-pie-chart"></i>
+                    <span>Compare</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+                <button class="btn btn-outline-light d-lg-none me-2" id="sidebar-toggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <span class="navbar-brand mb-0 h1 d-lg-none">
+                    <i class="bi bi-speedometer2"></i> API Monitor
+                </span>
+                <div class="d-flex gap-2 ms-auto">
+                    <button id="theme-toggle" class="btn btn-sm btn-outline-light" title="Switch theme">
+                        <i class="bi bi-moon-stars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid py-4">
+            <!-- Dashboard Stats Row -->
+            <div class="row g-3 mb-5">
+                <!-- Total APIs Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-diagram-3 text-primary"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Total APIs</h6>
+                            <h2 class="card-text mb-1" id="total-apis">0</h2>
+                            <small class="text-muted">Configured</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active APIs Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100 border-success">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Active APIs</h6>
+                            <h2 class="card-text text-success mb-1" id="active-apis">0</h2>
+                            <small class="text-muted">Currently monitoring</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slow APIs Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100 border-warning">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-clock-history text-warning"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Slow APIs</h6>
+                            <h2 class="card-text text-warning mb-1" id="slow-apis-count">0</h2>
+                            <small class="text-muted">Currently slow</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paused APIs Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-pause-circle text-warning"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Paused APIs</h6>
+                            <h2 class="card-text text-warning mb-1" id="paused-apis">0</h2>
+                            <small class="text-muted">Not monitoring</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Response Time Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-clock text-info"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Avg Response Time</h6>
+                            <h2 class="card-text mb-1" id="avg-response"><span id="avg-response-val">0</span> ms</h2>
+                            <small class="text-muted">Last 24 hours</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Count Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100 border-danger">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-exclamation-triangle text-danger"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Errors (24h)</h6>
+                            <h2 class="card-text text-danger mb-1" id="error-count">0</h2>
+                            <small class="text-muted">Last 24 hours</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Errors Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100 border-danger">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-x-circle text-danger"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Total Errors</h6>
+                            <h2 class="card-text text-danger mb-1" id="total-errors">0</h2>
+                            <small class="text-muted">All time</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slowest API Card -->
+                <div class="col-xl col-lg-3 col-md-4 col-sm-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-icon mb-2">
+                                <i class="bi bi-turtle text-secondary"></i>
+                            </div>
+                            <h6 class="card-title text-muted mb-1">Slowest API</h6>
+                            <h5 class="card-text mb-1" id="slowest-api-name">N/A</h5>
+                            <small class="text-muted" id="slowest-api-time">0 ms</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure Alerts Section -->
+                <div class="row mb-4" id="alerts-row" style="display: none;">
+                    <div class="col-12">
+                        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                <h5 class="alert-heading mb-0">API Failure Alerts</h5>
+                            </div>
+                            <div id="alerts-container">
+                                <!-- Dynamically populated with alerts -->
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add API Form -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    <h5 class="mb-0">Add New API to Monitor</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="add-api-form">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="project-id" class="form-label fw-semibold">Project</label>
+                                            <select class="form-select" id="project-id">
+                                                <option value="">No Project</option>
+                                                <!-- Projects will be loaded dynamically -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="api-name" class="form-label fw-semibold">API Name</label>
+                                            <input type="text" class="form-control" id="api-name"
+                                                placeholder="e.g., My API" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="api-url" class="form-label fw-semibold">API URL</label>
+                                            <input type="url" class="form-control" id="api-url"
+                                                placeholder="https://example.com/api" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-plus-lg me-1"></i> Add API
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div id="form-message" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APIs Table -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-table me-2"></i>
+                                    <h5 class="mb-0">APIs Status</h5>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Search Input -->
+                                <div class="p-3 border-bottom">
+                                    <input type="text" id="api-search" class="form-control"
+                                        placeholder="Search by API name or URL...">
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" id="apis-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center">
+                                                    <input type="checkbox" id="select-all-apis" title="Select all APIs">
+                                                </th>
+                                                <th>API Name</th>
+                                                <th>URL</th>
+                                                <th>Status</th>
+                                                <th>Uptime %</th>
+                                                <th>Response Time (ms)</th>
+                                                <th>Last Checked</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apis-tbody" class="align-middle">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                                    <div id="pagination-info" class="text-muted">
+                                        Showing 0 of 0 APIs
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" id="prev-page" disabled>
+                                            <i class="bi bi-chevron-left"></i> Previous
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" id="next-page" disabled>
+                                            Next <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 p-3 border-top" id="bulk-actions" style="display: none;">
+                                    <button class="btn btn-sm btn-primary" onclick="compareSelected()">
+                                        <i class="bi bi-pie-chart me-1"></i> Compare Selected
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="downloadSelected()">
+                                        <i class="bi bi-download me-1"></i> Download Logs
+                                    </button>
+                                </div>
+                                <div id="no-apis" class="text-center py-5">
+                                    <i class="bi bi-diagram-3 text-muted fs-1 mb-3"></i>
+                                    <p class="text-muted fs-5 mb-0">No APIs added yet. Add one to get started!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Time Chart -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    <h5 class="mb-0">Response Time Trend (Last 24 Hours)</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="responseTimeChart" height="80"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Custom JS -->
+        <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>

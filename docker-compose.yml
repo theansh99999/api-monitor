@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: api_monitor_db
+    restart: always
+    environment:
+      MYSQL_HOST: localhost
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: api_monitor
+      MYSQL_USER: monitor_user
+      MYSQL_PASSWORD: monitor_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      # Persist MySQL data
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - monitor_network
+
+  # Flask Web Application Service
+  web:
+    build: .
+    container_name: api_monitor_web
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_APP: app/app.py
+      FLASK_ENV: production
+      MYSQL_HOST: db
+      MYSQL_USER: monitor_user
+      MYSQL_PASSWORD: monitor_pass
+      MYSQL_DATABASE: api_monitor
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    networks:
+      - monitor_network
+
+volumes:
+  mysql_data:
+
+networks:
+  monitor_network:
+    driver: bridge

@@ -395,3 +395,10 @@ docker-compose logs db
 # View all logs
 docker-compose logs
 ```
+## 👤 Author
+
+**Ansh Kumar**
+
+- GitHub: https://github.com/theansh99999
+- LinkedIn: https://www.linkedin.com/in/anshkumarrai/
+- Gmail: work.anshkumarrai.gamil.com

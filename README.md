@@ -1,11 +1,17 @@
 # API Monitoring Dashboard
 
-A production-grade Flask-based API monitoring dashboard that allows users to monitor uptime, response times, and view detailed logs for multiple APIs in real-time.
+## 🚀 Live API Monitoring Dashboard
+
+A production-ready system to monitor API uptime, performance, and failures in real-time with alerts, analytics, and visualization.
+
+
+📊 **Tracks:** Uptime • Response Time • Errors • Alerts  
+⚡ **Built for:** Developers, DevOps, Backend Engineers
 
 ## Features
 
 ✅ **API Monitoring**
-- Add and manage multiple APIs to monitor
+- Multi-API monitoring with real-time status
 - Real-time status tracking (UP/DOWN)
 - Response time measurement
 - Automatic monitoring every 30 seconds

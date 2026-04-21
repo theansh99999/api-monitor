@@ -1,4 +1,7 @@
 # API Monitoring Dashboard
+![Flask](https://img.shields.io/badge/Flask-2.3-green)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 
 ## 🚀 Live API Monitoring Dashboard
 
@@ -382,7 +385,8 @@ export MYSQL_DATABASE=api_monitor
 # Run Flask app
 python app/app.py
 ```
-
+## Demo link 
+Youtube link: https://youtu.be/8NFYV6rOgQU?si=2qY1p4Bn_eDq4klz
 ## License
 
 This project is provided as-is for educational and commercial use.
